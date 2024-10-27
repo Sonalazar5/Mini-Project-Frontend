@@ -23,6 +23,52 @@
   font-size: calc(10px + 2vmin);
   color: white;
 }
+/* Add this to your styles.css or equivalent */
+
+.products-container {
+  padding: 20px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px; /* Space between grid items */
+}
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for better visibility */
+}
+
+.card-img-top {
+  width: 100%;
+  height: 200px; /* Set height to maintain card consistency */
+  object-fit: cover; /* Ensure image covers the area */
+}
+
+.card-body {
+  padding: 15px;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-text {
+  margin-bottom: 1rem;
+}
+
+.btn {
+  margin-right: 10px;
+}
 
 .App-link {
   color: #61dafb;
