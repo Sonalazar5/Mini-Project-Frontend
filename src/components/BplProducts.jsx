@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom';
 const BplProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(''); // State for the search term
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedWeights, setSelectedWeights] = useState({}); // State to store selected weights
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,31 +25,35 @@ const BplProducts = () => {
   }, []);
 
   const handleBuyNow = async (product) => {
+    const selectedWeight = selectedWeights[product._id] || 1; // Default to 1 kg if no weight selected
+    const pricePerKg = product.price || 100; // Default price per kg as 100 if not provided
+    const calculatedPrice = pricePerKg * selectedWeight;
+
     try {
       const isBPLUser = true; // Replace with actual condition to check if the user is BPL
-  
+
       if (isBPLUser) {
         // Directly create an order on the server without using Razorpay for BPL users
         const orderResponse = await axios.post('http://localhost:8080/bpl-order', {
           userId: localStorage.getItem('userId'),
           productId: product._id,
           amount: 0, // No charge for BPL users
-          notes: { productName: product.name, userCategory: 'BPL' },
+          notes: { productName: product.name, userCategory: 'BPL', weight: `${selectedWeight} kg` },
         });
-  
+
         console.log('Order created successfully for BPL user:', orderResponse.data);
         alert('Order placed successfully for BPL user!');
       } else {
         // Proceed with the Razorpay payment for non-BPL users
         const orderResponse = await axios.post('http://localhost:8080/order', {
-          amount: product.price * 100,
+          amount: calculatedPrice * 100,
           currency: 'INR',
           receipt: `receipt_${product._id}`,
-          notes: { productName: product.name },
+          notes: { productName: product.name, weight: `${selectedWeight} kg` },
         });
-  
+
         const { id: order_id, currency, amount } = orderResponse.data;
-  
+
         const options = {
           key: process.env.REACT_APP_RAZORPAY_KEY_ID,
           amount: amount,
@@ -64,11 +69,11 @@ const BplProducts = () => {
               razorpaySignature: response.razorpay_signature,
               userId: localStorage.getItem('userId'),
               productId: product._id,
-              amount: product.price * 100,
+              amount: calculatedPrice * 100,
               currency: 'INR',
               receipt: `receipt_${product._id}`,
             };
-  
+
             try {
               const paymentResponse = await axios.post('http://localhost:8080/paymentsuccess', paymentData);
               console.log('Payment response:', paymentResponse.data);
@@ -90,7 +95,7 @@ const BplProducts = () => {
             color: '#3399cc',
           },
         };
-  
+
         if (typeof window.Razorpay !== 'undefined') {
           const razorpay = new window.Razorpay(options);
           razorpay.open();
@@ -103,12 +108,14 @@ const BplProducts = () => {
       alert('Error during order process. Please try again.');
     }
   };
-  
-  
-  // Filtered products based on the search term
+
+  const handleWeightChange = (productId, weight) => {
+    setSelectedWeights(prevWeights => ({ ...prevWeights, [productId]: weight }));
+  };
+
   const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) || // Search by name
-    product.description.toLowerCase().includes(searchTerm.toLowerCase()) // Search by description
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -117,7 +124,7 @@ const BplProducts = () => {
         type="text"
         placeholder="Search products..."
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)} // Update search term on input change
+        onChange={(e) => setSearchTerm(e.target.value)}
         style={{
           padding: '10px',
           margin: '20px',
@@ -148,7 +155,7 @@ const BplProducts = () => {
                     padding: '20px',
                     background: 'rgba(255, 255, 255, 0.8)',
                     width: '300px',
-                    height: '480px',
+                    height: '500px',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
@@ -167,31 +174,35 @@ const BplProducts = () => {
                   />
                   <h3 style={{ fontSize: '1.2em', margin: '10px 0' }}>{product.name}</h3>
                   <p style={{ fontSize: '0.9em', color: '#555' }}>{product.description}</p>
-                  <p style={{ fontWeight: 'bold', color: '#2c3e50' }}>Price: ₹{product.price}</p>
-                  <p style={{ fontSize: '0.9em', color: '#777' }}>Category: {product.category}</p>
+                  <p style={{ fontWeight: 'bold', color: '#2c3e50' }}>Price per kg: ₹{product.price || 100}</p>
+                  <select
+                    onChange={(e) => handleWeightChange(product._id, parseInt(e.target.value))}
+                    value={selectedWeights[product._id] || 1}
+                    style={{ padding: '5px', margin: '10px 0' }}
+                  >
+                    <option value={1}>1 kg</option>
+                    <option value={5}>5 kg</option>
+                    <option value={10}>10 kg</option>
+                  </select>
+                  <p style={{ fontWeight: 'bold', color: '#2c3e50' }}>
+                    Selected Weight Price: ₹{(product.price || 100) * (selectedWeights[product._id] || 1)}
+                  </p>
                 </div>
-                <div
+                <button
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    padding: '10px 15px',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    width: '100%',
                     marginTop: '10px',
                   }}
+                  onClick={() => handleBuyNow(product)}
                 >
-                  <button
-                    style={{
-                      backgroundColor: '#007bff',
-                      color: 'white',
-                      border: 'none',
-                      padding: '10px 15px',
-                      borderRadius: '5px',
-                      cursor: 'pointer',
-                      width: '100%',
-                    }}
-                    onClick={() => handleBuyNow(product)}
-                  >
-                   ORDER NOW
-                  </button>
-                </div>
+                  ORDER NOW
+                </button>
               </div>
             ))}
           </div>

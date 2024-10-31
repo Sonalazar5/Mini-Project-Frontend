@@ -44,7 +44,7 @@ const ViewBPLOrders = () => {
           <thead style={{ backgroundColor: '#4CAF50', color: 'white' }}>
             <tr>
               <th style={{ padding: '10px', border: '1px solid #ddd' }}>Order ID</th>
-              <th style={{ padding: '10px', border: '1px solid #ddd' }}>User ID</th>
+              
               <th style={{ padding: '10px', border: '1px solid #ddd' }}>Product ID</th>
               <th style={{ padding: '10px', border: '1px solid #ddd' }}>Notes</th>
               <th style={{ padding: '10px', border: '1px solid #ddd' }}>Created At</th>
@@ -54,7 +54,7 @@ const ViewBPLOrders = () => {
             {orders.map(order => (
               <tr key={order._id} style={{ borderBottom: '1px solid #ddd' }}>
                 <td style={{ padding: '10px', textAlign: 'center' }}>{order._id}</td>
-                <td style={{ padding: '10px', textAlign: 'center' }}>{order.userId}</td>
+                
                 <td style={{ padding: '10px', textAlign: 'center' }}>{order.productId}</td>
                 <td style={{ padding: '10px', textAlign: 'center' }}>{JSON.stringify(order.notes)}</td>
                 <td style={{ padding: '10px', textAlign: 'center' }}>{new Date(order.createdAt).toLocaleString()}</td>

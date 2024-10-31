@@ -43,7 +43,7 @@ const UserProfile = () => {
             Welcome {userName}!
           </h2>
           <p style={{ color: '#555', fontSize: '16px' }}>
-            Here you can view your orders, browse products, and manage your cart.
+            Here you can view your orders, browse products,see diet plans, manage your cart and give feedback.
           </p>
         </div>
 
@@ -63,7 +63,7 @@ const UserProfile = () => {
             href="#" 
             onClick={handleLogout}
             style={{
-              width: '100%',
+              width: '10%',
               padding: '10px',
               fontSize: '1.1rem',
               borderRadius: '5px',

@@ -1,22 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Cart = ({ userId }) => {
   const [cart, setCartState] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const navigate = useNavigate();
+
+  // Ensure userId is available; fallback to localStorage if not passed as prop
+  const effectiveUserId = userId || localStorage.getItem('userId');
+  const handleBackClick = () => {
+    navigate(-1); // Navigate one step back in the history stack
+  };
 
   useEffect(() => {
     const fetchCart = async () => {
-      if (!userId) {
+      if (!effectiveUserId) {
         console.warn('No userId provided. Cannot fetch cart.');
         setLoading(false);
         return;
       }
 
       try {
-        const response = await axios.get('http://localhost:8080/viewCart', { params: { userId } });
+        const response = await axios.get('http://localhost:8080/viewCart', { params: { userId: effectiveUserId } });
         if (response.data && response.data.products) {
           setCartState(response.data.products);
         } else {
@@ -30,7 +38,7 @@ const Cart = ({ userId }) => {
     };
 
     fetchCart();
-  }, [userId]);
+  }, [effectiveUserId]);
 
   const handleBuyNow = async (item) => {
     const product = item.productId;
@@ -63,7 +71,7 @@ const Cart = ({ userId }) => {
             razorpayPaymentId: response.razorpay_payment_id,
             razorpayOrderId: response.razorpay_order_id,
             razorpaySignature: response.razorpay_signature,
-            userId: localStorage.getItem('userId'),
+            userId: effectiveUserId,
             productId: product._id,
             amount: product.price * item.quantity * 100,
             currency: 'INR',
@@ -73,6 +81,8 @@ const Cart = ({ userId }) => {
           try {
             await axios.post('http://localhost:8080/paymentsuccess', paymentData);
             setPaymentSuccess(true);
+            // Remove product from cart after successful payment
+            setCartState(cart.filter(cartItem => cartItem.productId?._id !== product._id));
           } catch (error) {
             console.error('Error recording payment:', error.response ? error.response.data : error.message);
           }
@@ -100,7 +110,7 @@ const Cart = ({ userId }) => {
 
   const removeProduct = async (productId) => {
     try {
-      await axios.delete('http://localhost:8080/remove', { data: { userId, productId } });
+      await axios.delete('http://localhost:8080/remove', { data: { userId: effectiveUserId, productId } });
       setCartState(cart.filter(item => item.productId?._id !== productId));
     } catch (error) {
       console.error('Error removing product:', error.response ? error.response.data : error.message);
@@ -180,6 +190,11 @@ const Cart = ({ userId }) => {
                       style={{ borderRadius: '5px', padding: '8px 12px', backgroundColor: '#007bff', color: '#fff' }}
                     >
                       Buy Now
+                    </button>
+                  </div>
+                  <div>
+                    <button onClick={handleBackClick} style={{ padding: '10px', margin: '10px', borderRadius: '5px', backgroundColor: '#007bff', color: '#fff', border: 'none' }}>
+                      Back
                     </button>
                   </div>
                 </>

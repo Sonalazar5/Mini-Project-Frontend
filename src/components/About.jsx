@@ -1,6 +1,6 @@
 import React from 'react';
 import './About.css'; // Ensure you create an About.css file for styling
-
+import { useNavigate } from 'react-router-dom';
 const About = () => {
   const technologies = [
     {
@@ -19,7 +19,10 @@ const About = () => {
       image: "mill.jpeg" // Replace with your image path
     }
   ];
-
+  const navigate = useNavigate();
+  const handleBackClick = () => {
+    navigate(-1); // Navigate one step back in the history stack
+  };
   return (
     <div className="about-page">
       <h1 className="about-title">About Our Rice Mill</h1>
@@ -52,7 +55,14 @@ const About = () => {
           </div>
         ))}
       </div>
+      <div>
+      <button onClick={handleBackClick} style={{ padding: '10px', margin: '10px', borderRadius: '5px', backgroundColor: '#007bff', color: '#fff', border: 'none' }}>
+        Back
+      </button>
+      {/* Your cart content here */}
     </div>
+    </div>
+    
   );
 };
 

@@ -10,11 +10,9 @@ const PaymentHistory = () => {
     const fetchPayments = async () => {
       try {
         const paymentResponse = await axios.get('http://localhost:8080/viewpayments');
-        // Filter out BPL product orders
         const filteredPayments = paymentResponse.data.filter(payment => !payment.bplproduct);
         setPayments(filteredPayments);
 
-        // Calculate most sold product from filtered payments
         const productCount = {};
         filteredPayments.forEach(payment => {
           const productName = payment.product ? payment.product.name : 'Unknown Product';
@@ -47,6 +45,7 @@ const PaymentHistory = () => {
               <th style={styles.th}>User Name</th>
               <th style={styles.th}>Phone Number</th>
               <th style={styles.th}>Email</th>
+              <th style={styles.th}>Address</th>
               <th style={styles.th}>Product Name</th>
               <th style={styles.th}>Amount</th>
               <th style={styles.th}>Payment ID</th>
@@ -61,6 +60,7 @@ const PaymentHistory = () => {
                   <td style={styles.td}>{payment.userId ? payment.userId.name : 'Unknown User'}</td>
                   <td style={styles.td}>{payment.userId ? payment.userId.phonenumber : 'N/A'}</td>
                   <td style={styles.td}>{payment.userId ? payment.userId.email : 'N/A'}</td>
+                  <td style={styles.td}>{payment.userId ? payment.userId.address : 'N/A'}</td>
                   <td style={styles.td}>{payment.product ? payment.product.name : 'Unknown Product'}</td>
                   <td style={styles.td}>₹{(payment.amount / 100).toFixed(2)}</td>
                   <td style={styles.td}>{payment.razorpayPaymentId}</td>
@@ -70,7 +70,7 @@ const PaymentHistory = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="8" style={styles.emptyMessage}>No payments found</td>
+                <td colSpan="9" style={styles.emptyMessage}>No payments found</td>
               </tr>
             )}
           </tbody>
